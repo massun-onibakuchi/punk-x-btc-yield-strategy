@@ -122,7 +122,7 @@ contract IdleModel is ModelInterface, ModelStorage {
 
     /**
      * @notice swap gov token to underlying if any.
-     * @dev An insufficient amount of governor tokens in the input will 
+     * @dev An insufficient amount of governor tokens in the input will
      * @dev cause the output to go to 0 when swapped by uniswap and cause a revert.
      */
     function _swapGovTokenToUnderlying() internal {
