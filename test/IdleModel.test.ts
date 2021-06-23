@@ -104,12 +104,38 @@ describe("IdleModel", async function () {
         const signer = ethers.provider.getSigner(signerAddr);
         await invest(signer, amount);
         await idleModel.redeemUnderlying(amount, idleModel.address);
-        const fee = amount.div(100);
+        const fee = amount.div(100); // idle fi withdraw fee 10% ??
         expect(await wBTC.balanceOf(idleModel.address)).to.be.gt(amount.sub(fee));
     });
 
     it("withdrawTo:only forge can withdraw", async () => {
         await expect(idleModel.withdrawTo(amount, forge.address)).to.be.revertedWith("MODEL : Only Forge");
+    });
+
+    it("withdrawTo:when enough amount in model", async () => {
+        const amountToWithdraw = amount.div(10);
+        const signer = ethers.provider.getSigner(signerAddr);
+        await wBTC.connect(signer).transfer(idleModel.address, amount);
+        const forgeSigner = ethers.provider.getSigner(forge.address);
+        await idleModel.connect(forgeSigner).withdrawTo(amountToWithdraw, wallet.address);
+        expect(await wBTC.balanceOf(wallet.address)).to.be.eq(amountToWithdraw);
+        expect(await wBTC.balanceOf(idleModel.address)).to.be.eq(amount.sub(amountToWithdraw));
+    });
+
+    it("withdrawTo: when not enough amount in model", async () => {
+        const amountToInvest = amount.div(10);
+        const balanceInModel = amount.sub(amountToInvest);
+        const signer = ethers.provider.getSigner(signerAddr);
+        await invest(signer, amountToInvest);
+        await wBTC.connect(signer).transfer(idleModel.address, balanceInModel);
+
+        const forgeSigner = ethers.provider.getSigner(forge.address);
+        await idleModel.connect(forgeSigner).withdrawTo(amount, wallet.address);
+        // should be one of them because of rounding of solidity calculations
+        expect(await wBTC.balanceOf(wallet.address)).to.satisfy((balance: BigNumber) => {
+            if (balance.eq(amount) || balance.eq(amount.sub(1))) return true;
+            else return false;
+        });
     });
 
     it("claimGovToken: can claim IDLE", async () => {
