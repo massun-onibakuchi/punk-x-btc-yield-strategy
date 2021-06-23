@@ -11,6 +11,9 @@
     "[solidity]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[markdown]": {
+        "editor.formatOnSave": false
+    },
     "eslint.lintTask.enable": true,
     "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

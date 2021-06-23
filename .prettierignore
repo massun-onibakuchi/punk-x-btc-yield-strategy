@@ -2,3 +2,4 @@ contracts/
 typechain/
 cache/
 artifacts/
+**/*.md
