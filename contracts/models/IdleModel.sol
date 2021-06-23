@@ -31,10 +31,10 @@ contract IdleModel is ModelInterface, ModelStorage {
     ) public {
         setForge(forge_);
         addToken(token_); // underlyingToken
-        idleToken = idleToken_;
-        govToken = govToken_;
+        idleToken = idleToken_; // e.g. IdleWBTC (best-yield strategy)
+        govToken = govToken_; // IDLE
         uRouterV2 = uRouterV2_;
-        referral = referral_;
+        referral = referral_; // idle fi reffral
     }
 
     function underlyingBalanceInModel() public view override returns (uint256) {
@@ -48,6 +48,9 @@ contract IdleModel is ModelInterface, ModelStorage {
             );
     }
 
+    /**
+     * @notice invest underlying in this contract to idle fi
+     */
     function invest() public override {
         uint256 balance = underlyingBalanceInModel();
         IERC20(token(0)).safeApprove(idleToken, balance);
@@ -55,6 +58,9 @@ contract IdleModel is ModelInterface, ModelStorage {
         emit Invest(balance, block.timestamp);
     }
 
+    /**
+     * @notice claim governance token and swap to underlying, then reinvest underlying.
+     */
     function reInvest() internal {
         _claimGovToken();
         _swapGovTokenToUnderlying();
@@ -108,12 +114,17 @@ contract IdleModel is ModelInterface, ModelStorage {
     }
 
     /**
-     * @dev Claim only accrued govnance token. this method doesn't redeem IIdleToken.
+     * @dev Claim only accrued govnance token. this method doesn't redeem IdleToken.
      */
     function _claimGovToken() internal {
         IIdleToken(idleToken).redeemIdleToken(0);
     }
 
+    /**
+     * @notice swap gov token to underlying if any.
+     * @dev An insufficient amount of governor tokens in the input will 
+     * @dev cause the output to go to 0 when swapped by uniswap and cause a revert.
+     */
     function _swapGovTokenToUnderlying() internal {
         uint256 balance = IERC20(govToken).balanceOf(address(this));
         if (balance > 0) {

@@ -1,20 +1,21 @@
 import hre, { ethers } from "hardhat";
 import { expect, use } from "chai";
 import { Contract } from "@ethersproject/contracts";
-import { IdleModelTest, IUniswapV2Router02, IERC20, IIdleToken } from "../typechain";
 import { BigNumber } from "@ethersproject/bignumber";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { IdleModelTest, IUniswapV2Router02, IERC20, IIdleToken } from "../typechain";
 
 const toWei = ethers.utils.parseEther;
 use(require("chai-bignumber")());
 
+// get contract ABI via Etherscan API
 const getVerifiedContractAt = async (address: string): Promise<Contract> => {
     // @ts-ignore
     return hre.ethers.getVerifiedContractAt(address);
 };
 
 describe("IdleModel", async function () {
-    const signerAddr = "0x28c6c06298d514db089934071355e5743bf21d60";
+    const signerAddr = "0x28c6c06298d514db089934071355e5743bf21d60"; // wBTC holder
     const idleHolderAddr = "0xEEe593DbddD91840D1Eb41ADd64f048AF3C45d21";
 
     const UNISWAPV2_ROUTERV2_ADDRESS = "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D";
@@ -24,7 +25,7 @@ describe("IdleModel", async function () {
     const WETH9_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
     const WBTC_DECIMALS = 8;
     const WBTC_EXP_SCALE = BigNumber.from(10).pow(WBTC_DECIMALS);
-    const amount = BigNumber.from(10).mul(WBTC_EXP_SCALE);
+    const amount = BigNumber.from(10).mul(WBTC_EXP_SCALE); // wBTC amount
 
     let wallet: SignerWithAddress;
     let forge: SignerWithAddress;
@@ -87,7 +88,7 @@ describe("IdleModel", async function () {
         await idleModel.invest();
     };
 
-    it("invest: forge can invest to idleWBTC", async () => {
+    it("invest: forge can invest assets to idleWBTC", async () => {
         expect(await idleModel.underlyingBalanceInModel()).to.eq(0);
         expect((await wBTC.balanceOf(signerAddr)).gt(amount)).to.be.true;
 
@@ -123,6 +124,7 @@ describe("IdleModel", async function () {
         await ethers.provider.send("hardhat_impersonateAccount", [idleHolderAddr]);
         const holder = ethers.provider.getSigner(idleHolderAddr);
 
+        // see https://uniswap.org/docs/v2/smart-contracts/library#getamountsout
         const path = [idle.address, WETH9_ADDRESS, WBTC_ADDRESS];
         const expectedAmountsOut = await uniswapV2Router.getAmountsOut(idleAmount, path);
         expect(expectedAmountsOut[2]).to.be.gt(0);
