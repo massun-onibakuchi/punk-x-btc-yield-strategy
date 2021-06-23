@@ -5,7 +5,7 @@ This repository integrates Idle fi as a yield source for punk.protocol.
 
 Idle is a decentralized protocol dedicated to bringing automatic asset allocation and aggregation to the interest-bearing tokens economy. This protocol bundles crypto-assets (ETH, WBTC, and stablecoins) into tokenized baskets that are programmed to automatically rebalance funds according to different management strategies.
 
-`IdleModel` is a wrapper contract implementing `ModelStorage` and `ModelInterface`. `IdleModel` contract supports the best yield strategies of Idle fi, because IdleTokens for Risk Adjusted strategy do not have a `tokenPriceWithFee` method.
+`IdleModel` is a wrapper contract implementing `ModelStorage` and `ModelInterface`. `IdleModel` contract supports the best yield strategies of Idle fi, because IdleTokens for Risk Adjusted strategy do not have a `tokenPriceWithFee` method. This Idle finance integration focuses on IdleWBTC V4 best-yield strategy.
 
 [Idle Finance Developer Doc](https://developers.idle.finance/)
 
