@@ -15,6 +15,31 @@ contract IdleModelTest is IdleModel {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
+    function withdrawTo(uint256 amount, address to) public override OnlyForge {
+        IERC20 uToken = IERC20(token(0));
+        uint256 balanceBefore = uToken.balanceOf(address(this));
+
+        // check balance
+        if (amount > balanceBefore) {
+            uint256 amountToWithdraw = amount.sub(balanceBefore);
+            _redeemUnderlying(amountToWithdraw, address(this));
+            uint256 balanceAfter = uToken.balanceOf(address(this));
+            uint256 _diff = balanceAfter.sub(balanceBefore);
+
+            console.log("input amount:>>", amount);
+            console.log("amountToWthdraw :>>", amountToWithdraw);
+            if (amountToWithdraw > _diff) {
+                console.log("_diff :>>", _diff);
+                amount = balanceBefore.add(_diff);
+            }
+        }
+        console.log("balanceBefore:>>", balanceBefore);
+        console.log("amount:>>", amount);
+
+        uToken.safeTransfer(to, amount);
+        emit Withdraw(amount, to, block.timestamp);
+    }
+
     function redeemUnderlying(uint256 amount, address account) public returns (uint256 redeemedAmounts) {
         redeemedAmounts = _redeemUnderlying(amount, account);
     }

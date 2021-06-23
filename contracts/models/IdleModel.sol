@@ -37,11 +37,11 @@ contract IdleModel is ModelInterface, ModelStorage {
         referral = referral_; // idle fi reffral
     }
 
-    function underlyingBalanceInModel() public view override returns (uint256) {
+    function underlyingBalanceInModel() public view virtual override returns (uint256) {
         return IERC20(token(0)).balanceOf(address(this));
     }
 
-    function underlyingBalanceWithInvestment() public view override returns (uint256) {
+    function underlyingBalanceWithInvestment() public view virtual override returns (uint256) {
         return
             underlyingBalanceInModel().add(
                 IIdleToken(idleToken).tokenPrice().mul(_idleTokenBalanceOf()).div(EXP_SCALE)
@@ -51,7 +51,7 @@ contract IdleModel is ModelInterface, ModelStorage {
     /**
      * @notice invest underlying in this contract to idle fi
      */
-    function invest() public override {
+    function invest() public virtual override {
         uint256 balance = underlyingBalanceInModel();
         IERC20(token(0)).safeApprove(idleToken, balance);
         IIdleToken(idleToken).mintIdleToken(balance, false, referral);
@@ -61,7 +61,7 @@ contract IdleModel is ModelInterface, ModelStorage {
     /**
      * @notice claim governance token and swap to underlying, then reinvest underlying.
      */
-    function reInvest() internal {
+    function reInvest() public virtual {
         _claimGovToken();
         _swapGovTokenToUnderlying();
         invest();
@@ -70,7 +70,7 @@ contract IdleModel is ModelInterface, ModelStorage {
     /**
      * @dev Withdraw all in model. accrued govanance are swapped to underlying.
      */
-    function withdrawAllToForge() public override OnlyForge {
+    function withdrawAllToForge() public virtual override OnlyForge {
         _redeemUnderlying(_idleTokenBalanceOf(), address(this));
         _swapGovTokenToUnderlying();
         uint256 allBalance = underlyingBalanceInModel();
@@ -78,7 +78,7 @@ contract IdleModel is ModelInterface, ModelStorage {
         emit Withdraw(allBalance, forge(), block.timestamp);
     }
 
-    function withdrawToForge(uint256 amount) public override OnlyForge {
+    function withdrawToForge(uint256 amount) public virtual override OnlyForge {
         withdrawTo(amount, forge());
     }
 
@@ -87,14 +87,21 @@ contract IdleModel is ModelInterface, ModelStorage {
      * @dev only transfer underlying token
      * @param amount amount of underlying that caller want to withdraw
      */
-    function withdrawTo(uint256 amount, address to) public override OnlyForge {
+    function withdrawTo(uint256 amount, address to) public virtual override OnlyForge {
         IERC20 uToken = IERC20(token(0));
         uint256 balanceBefore = uToken.balanceOf(address(this));
 
         if (amount > balanceBefore) {
-            uint256 redeemAmounts = amount.sub(balanceBefore);
-            _redeemUnderlying(redeemAmounts, address(this));
+            uint256 amountToWithdraw = amount.sub(balanceBefore);
+            _redeemUnderlying(amountToWithdraw, address(this));
+            uint256 balanceAfter = uToken.balanceOf(address(this));
+            uint256 _diff = balanceAfter.sub(balanceBefore);
+            
+            if (amountToWithdraw > _diff) {
+                amount = balanceBefore.add(_diff);
+            }
         }
+        
         uToken.safeTransfer(to, amount);
         emit Withdraw(amount, to, block.timestamp);
     }
