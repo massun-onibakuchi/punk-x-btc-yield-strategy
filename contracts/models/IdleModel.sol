@@ -96,12 +96,12 @@ contract IdleModel is ModelInterface, ModelStorage {
             _redeemUnderlying(amountToWithdraw, address(this));
             uint256 balanceAfter = uToken.balanceOf(address(this));
             uint256 _diff = balanceAfter.sub(balanceBefore);
-            
+
             if (amountToWithdraw > _diff) {
                 amount = balanceBefore.add(_diff);
             }
         }
-        
+
         uToken.safeTransfer(to, amount);
         emit Withdraw(amount, to, block.timestamp);
     }
