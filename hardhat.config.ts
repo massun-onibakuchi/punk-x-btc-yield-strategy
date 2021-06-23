@@ -10,6 +10,7 @@ import "hardhat-dependency-compiler";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
 const RINKEBY_ALCHEMY_API_KEY = process.env.RINKEBY_ALCHEMY_API_KEY;
 const ROPSTEN_ALCHEMY_API_KEY = process.env.ROPSTEN_ALCHEMY_API_KEY;
+const KOVAN_ALCHEMY_API_KEY = process.env.KOVAN_ALCHEMY_API_KEY;
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 const BLOCK_NUMBER = process.env.BLOCK_NUMBER || (process.env.BLOCK_NUMBER = "12068744");
 const PROJECT_ID = process.env.PROJECT_ID;
@@ -58,11 +59,18 @@ const config: HardhatUserConfig = {
         },
         rinkeby: {
             url: `https://eth-rinkeby.alchemyapi.io/v2/${RINKEBY_ALCHEMY_API_KEY}`,
-            // `https://ropsten.infura.io/v3/${PROJECT_ID}`
             // accounts: [privateKey1, privateKey2]
             accounts: {
                 mnemonic: MNEMONIC,
                 // path: "m/44'/60'/0'/0/0",
+                initialIndex: 0,
+                count: 10,
+            },
+        },
+        kovan: {
+            url: `https://eth-kovan.alchemyapi.io/v2/${KOVAN_ALCHEMY_API_KEY}`,
+            accounts: {
+                mnemonic: MNEMONIC,
                 initialIndex: 0,
                 count: 10,
             },
