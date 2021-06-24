@@ -10,9 +10,13 @@ const main = async () => {
 
     const [wallet, forge, reffral] = await ethers.getSigners();
 
+    console.log("Account :", wallet.address);
+    console.log("Account balance:", (await wallet.getBalance()).toString());
+
     const IdleModelFactory = await ethers.getContractFactory("IdleModel");
     const idleModel = (await IdleModelFactory.deploy()) as IdleModelTest;
 
+    console.log("Deploy!");
     console.log("idleModel.address :>> ", idleModel.address);
 
     // idleModel.initialize(
