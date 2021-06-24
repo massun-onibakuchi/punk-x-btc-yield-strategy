@@ -133,8 +133,7 @@ describe("IdleModel", async function () {
         await idleModel.connect(forgeSigner).withdrawTo(amount, wallet.address);
         // should be one of them because of rounding of solidity calculations
         expect(await wBTC.balanceOf(wallet.address)).to.satisfy((balance: BigNumber) => {
-            if (balance.eq(amount) || balance.eq(amount.sub(1))) return true;
-            else return false;
+            return balance.eq(amount) || balance.eq(amount.sub(1));
         });
     });
 
